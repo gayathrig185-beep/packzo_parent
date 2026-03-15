@@ -8,14 +8,13 @@ import lombok.Setter;
 @Setter
 @Getter
 @Entity
-@Table(name = "productCategory")
+@Table(name = "productCategory" , schema = "packzodev")
 public class ProductCategory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String productCategoryId;
     private String prdCategoryName;
-    private String prdCategoryDescripion;
+    private String prdCategoryDescription;
     private boolean isActive;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sector_sectorId")

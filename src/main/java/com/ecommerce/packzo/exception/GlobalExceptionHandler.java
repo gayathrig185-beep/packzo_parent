@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    @ExceptionHandler(Exception.class)
+ /*   @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneric(Exception ex) {
         logger.error("Unexpected error", ex);
 
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
                         "error", "INTERNAL_SERVER_ERROR",
                         "message", "Something went wrong"
                 ));
-    }
+    }*/
 
     @ExceptionHandler(PackzoException.class)
     public ResponseEntity<ErrorResponse> handlePackzoException(PackzoException ex) {

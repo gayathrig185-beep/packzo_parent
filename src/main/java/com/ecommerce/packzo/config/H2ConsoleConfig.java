@@ -1,3 +1,4 @@
+/*
 package com.ecommerce.packzo.config;
 
 
@@ -21,3 +22,4 @@ public class H2ConsoleConfig {
         return registration;
     }
 }
+*/
