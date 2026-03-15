@@ -10,11 +10,11 @@ import java.util.List;
 @Setter
 @Getter
 @Entity
-@Table(name = "product")
+@Table(name = "product" , schema="packzodev")
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long productId;
     private String productName;
     private String productShortDescription;
@@ -32,11 +32,10 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     private String aboutItem;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "productCategoryId")
-    private ProductCategory category;
+    @JoinColumn(name = "productCategory_productCategoryId")
+    private ProductCategory productCategory;
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<ProductVariant> variants;
-
 
 }
 

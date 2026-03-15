@@ -7,11 +7,11 @@ import lombok.Setter;
 @Setter
 @Getter
 @Entity
-@Table(name = "productVariant")
+@Table(name = "productVariant" , schema="packzodev")
 public class ProductVariant {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long variantId;
 
     private String modelName;

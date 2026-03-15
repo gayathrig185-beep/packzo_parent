@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.ecommerce.packzo.constants.ErroConstants.*;
+import static com.ecommerce.packzo.constants.ErrorConstants.*;
 
 
 @Service
@@ -52,7 +52,9 @@ public class CatalogServiceImpl implements CatalogService {
             categoryList = categories.stream()
                     .map(this::mapCategoryWithProducts)
                     .toList();
-        } catch (Exception e) {
+        } catch(PackzoException e){
+            throw new PackzoException(e.getErrorCode(),e.getText(),e.getErrorMessage());
+        }catch (Exception e) {
             logger.debug("Exception Occured in browseAll Method {}", e.getMessage());
             throw new PackzoException(SERVICE_500,INTERNAL_SERVER_ERROR,INTERNAL_SERVER_ERROR);
         }
@@ -67,7 +69,7 @@ public class CatalogServiceImpl implements CatalogService {
                     .findBySectorCodeAndIsActiveTrue(sectorCode))
                     .orElseThrow(() -> new PackzoException(SERVICE_004,SECTOR_NOT_FOUND,SECTOR_NOT_FOUND));
             if(industry.isPresent()){
-                List<ProductCategory> categories = Optional.ofNullable(categoryRepository.findBySectorAndIsActiveTrue(sectorCode))
+                List<ProductCategory> categories = Optional.ofNullable(categoryRepository.findBySectorSectorId(industry.get().getSectorId()))
                         .filter(prdCatList -> !prdCatList.isEmpty())
                         .orElseThrow(() -> new PackzoException(SERVICE_006,PRD_CAT_NOT_FOUND,PRD_CAT_NOT_FOUND));
 
@@ -80,8 +82,11 @@ public class CatalogServiceImpl implements CatalogService {
                         industry.get().getSectorName(),
                         categoryDtos);
             }
-        }catch(Exception ex){
-            logger.debug("Exception Occured in browseAll Method {}", ex.getMessage());
+        }catch(PackzoException e){
+            throw new PackzoException(e.getErrorCode(),e.getText(),e.getErrorMessage());
+        }
+        catch(Exception ex){
+            logger.debug("Exception Occured in browseBySector Method {}", ex.getMessage());
             throw new PackzoException(SERVICE_500,INTERNAL_SERVER_ERROR,INTERNAL_SERVER_ERROR);
         }
         return sectorResponseDto;
@@ -89,18 +94,26 @@ public class CatalogServiceImpl implements CatalogService {
 
     // 3️⃣ Category-wise
     public CategoryDto browseByCategory(String categoryId) {
+        ProductCategory category = null;
+        try{
+            category = categoryRepository.findById(categoryId)
+                    .filter(ProductCategory::isActive)
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-        ProductCategory category = categoryRepository.findById(categoryId)
-                .filter(ProductCategory::isActive)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-
+        }catch(PackzoException e){
+            throw new PackzoException(e.getErrorCode(),e.getText(),e.getErrorMessage());
+        }catch(Exception ex){
+            logger.debug("Exception Occured in browseByCategory Method {}", ex.getMessage());
+            throw new PackzoException(SERVICE_500,INTERNAL_SERVER_ERROR,INTERNAL_SERVER_ERROR);
+        }
         return mapCategoryWithProducts(category);
     }
 
     private CategoryDto mapCategoryWithProducts(ProductCategory category) {
 
-        List<Product> products = Optional.ofNullable(productRepository.findByCategoryAndIsActiveTrue(category.getProductCategoryId()))
-                .filter(prdList -> !prdList.isEmpty()).orElseThrow();
+        List<Product> products = Optional.ofNullable(productRepository.findByProductCategoryProductCategoryIdAndIsActiveTrue(category.getProductCategoryId()))
+                .filter(prdList -> !prdList.isEmpty())
+                .orElseThrow(() -> new PackzoException(SERVICE_009,INVALID_PRD_DATA,INVALID_PRD_DATA));
 
         List<ProductDto> productDtos = products.stream()
                 .map(p -> new ProductDto(p.getProductId(), p.getProductName(), p.getOriginalPrice(), p.getDiscountPrice()))

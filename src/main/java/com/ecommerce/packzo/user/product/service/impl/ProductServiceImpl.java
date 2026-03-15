@@ -52,8 +52,8 @@ public class ProductServiceImpl implements ProductService {
                     product.getColor(),
                     product.getCapacity(),
                     product.getAboutItem(),
-                    product.getCategory().getPrdCategoryName(),
-                    product.getCategory().getSector().getSectorName(),
+                    product.getProductCategory().getPrdCategoryName(),
+                    product.getProductCategory().getSector().getSectorName(),
                     variantDtos
             );
         }

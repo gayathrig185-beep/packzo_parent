@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-import static com.ecommerce.packzo.constants.ErroConstants.*;
+import static com.ecommerce.packzo.constants.ErrorConstants.*;
 
 @RestController
 @RequestMapping("/api/catalog")
@@ -52,10 +52,10 @@ public class CatalogController {
 
     // Category-wise
     @GetMapping("/categories/{categoryId}")
-    public ResponseEntity<CategoryDto> browseByCategory(
-            @PathVariable Long categoryId) {
-
-        return ResponseEntity.ok(
-                catalogService.browseByCategory(String.valueOf(categoryId)));
+    public CategoryDto browseByCategory(
+            @PathVariable String categoryId) {
+        String categoryValue = Optional.ofNullable(categoryId).filter(StringUtils::hasText)
+                .orElseThrow(() -> new PackzoException(SERVICE_008,INVALID_CATEGORY_ID,INVALID_CATEGORY_ID));
+        return catalogService.browseByCategory(categoryValue);
     }
 }
