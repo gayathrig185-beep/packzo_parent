@@ -1,3 +1,4 @@
+/*
 package com.ecommerce.packzo.user.product.controller;
 
 import com.ecommerce.packzo.response.ProductDetailDto;
@@ -27,4 +28,4 @@ public class ProductListController {
                 productService.getProductDetail(id)
         );
     }
-}
+}*/

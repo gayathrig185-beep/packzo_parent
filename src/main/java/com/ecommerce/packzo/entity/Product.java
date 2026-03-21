@@ -19,24 +19,23 @@ public class Product {
     private String productName;
     private String productShortDescription;
     private String productLongDescription;
-    private int quantity;
     private BigDecimal originalPrice;
     private BigDecimal discountPrice;
-    private String material;
-    private String feature;
-    private String color;
-    private String capacity;
     private Double rating;
     private Integer totalRatings;
     private boolean isActive;
-    @Column(columnDefinition = "TEXT")
-    private String aboutItem;
+    private String customerCare;
+    private String manfacturersAddress;
+    private String sellerAddress;
+    /*@ManyToMany
+    @JoinTable(name = "product_category_mapping", schema="packzodev", joinColumns = @JoinColumn(name = "product_id"),
+    inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @JoinColumn(name = "category_id")
+    private List<Category> categories;
+*/
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "productCategory_productCategoryId")
-    private ProductCategory productCategory;
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    private List<ProductVariant> variants;
-
+    @JoinColumn(name = "category_id")
+    private Category category;
 }
 
 

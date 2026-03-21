@@ -1,13 +1,10 @@
 package com.ecommerce.packzo.user.product.service.impl;
 
 import com.ecommerce.packzo.entity.Sector;
-import com.ecommerce.packzo.exception.PackzoException;
+import com.ecommerce.packzo.exception.PaczoException;
 import com.ecommerce.packzo.response.SectorDto;
-import com.ecommerce.packzo.response.SectorResponseDto;
-import com.ecommerce.packzo.user.product.controller.IndustrySectorListController;
 import com.ecommerce.packzo.user.product.repository.IndustryRepository;
 import com.ecommerce.packzo.user.product.service.interfaces.IndustryListService;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -38,7 +35,7 @@ public class IndustryListServiceImpl implements IndustryListService {
 
             List<Sector> sectorList = Optional.ofNullable(sectorRepository
                             .findByIsActiveTrueOrderBySectorNameAsc()).filter(sectorLists -> !sectorLists.isEmpty())
-                    .orElseThrow(() -> new PackzoException(SERVICE_007,INVALID_SECTOR_LIST,INVALID_SECTOR_LIST));
+                    .orElseThrow(() -> new PaczoException(SERVICE_007,INVALID_SECTOR_LIST,INVALID_SECTOR_LIST));
             sectList = sectorList.stream()
                     .map(sector -> {
                         SectorDto sectorResponseDto = new SectorDto();
@@ -49,11 +46,11 @@ public class IndustryListServiceImpl implements IndustryListService {
                     }).toList();
             logger.debug("Sector List {}", sectList);
             logger.debug("getAllActiveSector method ends");
-        }catch(PackzoException e){
-            throw new PackzoException(e.getErrorCode(),e.getText(),e.getErrorMessage());
+        }catch(PaczoException e){
+            throw new PaczoException(e.getErrorCode(),e.getText(),e.getErrorMessage());
         }catch(Exception ex){
             logger.debug("Exception Occured in getAllActiveSectors Method {}", ex.getMessage());
-            throw new PackzoException(SERVICE_500,INTERNAL_SERVER_ERROR,INTERNAL_SERVER_ERROR);
+            throw new PaczoException(SERVICE_500,INTERNAL_SERVER_ERROR,INTERNAL_SERVER_ERROR);
         }
         return sectList;
     }

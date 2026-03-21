@@ -43,8 +43,8 @@ public class GlobalExceptionHandler {
                 ));
     }*/
 
-    @ExceptionHandler(PackzoException.class)
-    public ResponseEntity<ErrorResponse> handlePackzoException(PackzoException ex) {
+    @ExceptionHandler(PaczoException.class)
+    public ResponseEntity<ErrorResponse> handlePackzoException(PaczoException ex) {
 
         logger.error("PackzoException occurred: {}", ex.getErrorMessage());
 

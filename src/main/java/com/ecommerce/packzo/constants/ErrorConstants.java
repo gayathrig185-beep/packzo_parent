@@ -11,6 +11,7 @@ public final class ErrorConstants {
     public static final String SERVICE_007 = "SER007";
     public static final String SERVICE_008 = "SER008";
     public static final String SERVICE_009 = "SER009";
+    public static final String SERVICE_010 = "SER010";
     public static final String SERVICE_500 = "SER500";
 
 
@@ -24,5 +25,6 @@ public final class ErrorConstants {
     public static final String INVALID_SECTOR_LIST = "No Sectors found . Please try again later";
     public static final String INVALID_CATEGORY_ID = "Category data is empty or null to browse products. Please try again later";
     public static final String INVALID_PRD_DATA = "No product founds for selected product category . Please try again later";
+    public static final String INVALID_SECTORID = "Invalid Sector id";
 
 }

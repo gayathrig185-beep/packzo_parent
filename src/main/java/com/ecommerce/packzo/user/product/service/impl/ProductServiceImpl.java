@@ -1,3 +1,4 @@
+/*
 package com.ecommerce.packzo.user.product.service.impl;
 
 import com.ecommerce.packzo.entity.Product;
@@ -8,6 +9,7 @@ import com.ecommerce.packzo.user.product.service.interfaces.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,15 +30,7 @@ public class ProductServiceImpl implements ProductService {
                     .orElseThrow(() ->
                             new RuntimeException("Product not found"));
 
-            List<VariantDto> variantDtos =
-                    product.getVariants()
-                            .stream()
-                            .map(v -> new VariantDto(
-                                    v.getVariantId(),
-                                    v.getModelName(),
-                                    v.getAdditionalPrice()
-                            ))
-                            .toList();
+            List<VariantDto> variantDtos = new ArrayList<>();
 
             return new ProductDetailDto(
                     product.getProductId(),
@@ -47,15 +41,9 @@ public class ProductServiceImpl implements ProductService {
                     product.getDiscountPrice(),
                     product.getRating(),
                     product.getTotalRatings(),
-                    product.getMaterial(),
-                    product.getFeature(),
-                    product.getColor(),
-                    product.getCapacity(),
-                    product.getAboutItem(),
-                    product.getProductCategory().getPrdCategoryName(),
-                    product.getProductCategory().getSector().getSectorName(),
                     variantDtos
             );
         }
 }
 
+*/
