@@ -1,11 +1,9 @@
-package com.ecommerce.packzo.user.product.controller;
+package com.ecommerce.packzo.product.controller;
 
 import com.ecommerce.packzo.response.SectorDto;
-import com.ecommerce.packzo.user.product.service.interfaces.IndustryListService;
-import lombok.RequiredArgsConstructor;
+import com.ecommerce.packzo.product.service.interfaces.IndustryListService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

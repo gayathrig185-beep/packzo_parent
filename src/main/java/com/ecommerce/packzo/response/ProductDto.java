@@ -7,5 +7,6 @@ public record ProductDto(
         String name,
         BigDecimal originalPrice,
         BigDecimal discountPrice,
-        Integer ratings
+        Integer ratings,
+        String percentage
 ) {}

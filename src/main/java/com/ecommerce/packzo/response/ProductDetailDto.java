@@ -12,12 +12,5 @@ public record ProductDetailDto(
         BigDecimal discountPrice,
         Double rating,
         Integer totalRatings,
-        String material,
-        String feature,
-        String color,
-        String capacity,
-        String aboutItem,
-        String categoryName,
-        String sectorName,
         List<VariantDto> variants
 ) {}

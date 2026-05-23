@@ -1,4 +1,4 @@
-package com.ecommerce.packzo.user.product.repository;
+package com.ecommerce.packzo.product.repository;
 
 import com.ecommerce.packzo.entity.Category;
 import org.springframework.data.domain.Page;
@@ -14,6 +14,12 @@ import java.util.List;
 public interface CategoryRepository extends JpaRepository<Category, String> {
 
     Page<Category> findByIsActiveTrue(Pageable categoryPage);
+
+    @Query(value = "SELECT cat.categoryId from Category cat")
+    List<String> findAllCategories();
+
+    @Query(value = "SELECT  cat from Category cat")
+    List<Category> findAllCategoriesList();
 
     /*@Query(value = "SELECT pc FROM Category pc WHERE pc.sector.sectorId = :sectorId and isActive = true")
     Page<Category> findByCategoriesBySector(@Param("sectorId")Long sectorId ,Pageable categoryPage);*/

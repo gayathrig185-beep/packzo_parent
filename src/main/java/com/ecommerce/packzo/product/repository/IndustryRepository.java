@@ -1,4 +1,4 @@
-package com.ecommerce.packzo.user.product.repository;
+package com.ecommerce.packzo.product.repository;
 
 import com.ecommerce.packzo.entity.Sector;
 import org.springframework.data.domain.Page;

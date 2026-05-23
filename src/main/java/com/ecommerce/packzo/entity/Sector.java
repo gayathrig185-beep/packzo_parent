@@ -17,7 +17,12 @@ public class Sector {
     @Column(unique = true, nullable = false)
     private String sectorCode;
 
+    @Column
     private String sectorName;
 
-    private Boolean isActive = true;
+    @Column
+    private Boolean isActive;
+
+    @Column
+    private int sectorOrder;
 }

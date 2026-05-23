@@ -1,10 +1,10 @@
-package com.ecommerce.packzo.user.product.service.impl;
+package com.ecommerce.packzo.product.service.impl;
 
 import com.ecommerce.packzo.entity.Sector;
 import com.ecommerce.packzo.exception.PaczoException;
 import com.ecommerce.packzo.response.SectorDto;
-import com.ecommerce.packzo.user.product.repository.IndustryRepository;
-import com.ecommerce.packzo.user.product.service.interfaces.IndustryListService;
+import com.ecommerce.packzo.product.repository.IndustryRepository;
+import com.ecommerce.packzo.product.service.interfaces.IndustryListService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -42,6 +42,7 @@ public class IndustryListServiceImpl implements IndustryListService {
                         sectorResponseDto.setSectorId(String.valueOf(sector.getSectorId()));
                         sectorResponseDto.setSectorCode(sector.getSectorCode());
                         sectorResponseDto.setSectorName(sector.getSectorName());
+                        sectorResponseDto.setSectorOrder(sector.getSectorOrder());
                         return sectorResponseDto;
                     }).toList();
             logger.debug("Sector List {}", sectList);

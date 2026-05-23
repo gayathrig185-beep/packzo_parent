@@ -16,17 +16,19 @@ public class ProductVariant {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private String variantId;
     private String variantName;
-    private int quantity;
+    private int noOfPieces;
     private String material;
     private String feature;
+    private String description;
     private String color;
-    private int capacity;
+    private String capacity;
+    private String disclaimer;
+    private String dimensions;
     @Column(columnDefinition = "TEXT")
     private String aboutItem;
     private BigDecimal originalPrice;
     private BigDecimal discountedPrice;
-    private Integer units;
-    private String countryOfOrigin;
+    private String units;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;

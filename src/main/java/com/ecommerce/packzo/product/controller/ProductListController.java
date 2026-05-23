@@ -1,8 +1,9 @@
 /*
-package com.ecommerce.packzo.user.product.controller;
+package com.ecommerce.packzo.product.controller;
 
+import com.ecommerce.packzo.product.service.impl.ProductServiceImpl;
+import com.ecommerce.packzo.product.service.interfaces.ProductService;
 import com.ecommerce.packzo.response.ProductDetailDto;
-import com.ecommerce.packzo.user.product.service.interfaces.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +21,7 @@ public class ProductListController {
         this.productService = productService;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{productId}")
     public ResponseEntity<ProductDetailDto> getProductDetail(
             @PathVariable Long id) {
 
@@ -28,4 +29,5 @@ public class ProductListController {
                 productService.getProductDetail(id)
         );
     }
-}*/
+}
+*/

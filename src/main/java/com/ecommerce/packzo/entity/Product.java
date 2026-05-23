@@ -27,15 +27,21 @@ public class Product {
     private String customerCare;
     private String manfacturersAddress;
     private String sellerAddress;
+    private String countryOfOrigin;
+    private String returnPolicy;
+    private String careDetails;
     /*@ManyToMany
     @JoinTable(name = "product_category_mapping", schema="packzodev", joinColumns = @JoinColumn(name = "product_id"),
     inverseJoinColumns = @JoinColumn(name = "category_id"))
     @JoinColumn(name = "category_id")
     private List<Category> categories;
 */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
+    @JoinColumn(name = "product_type_id")
+    private ProductType productType;
+    /*@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
-    private Category category;
+    private Category category;*/
 }
 
 
