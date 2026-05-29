@@ -34,7 +34,7 @@ public class IndustryListServiceImpl implements IndustryListService {
             logger.debug("getAllActiveSector method begins");
 
             List<Sector> sectorList = Optional.ofNullable(sectorRepository
-                            .findByIsActiveTrueOrderBySectorNameAsc()).filter(sectorLists -> !sectorLists.isEmpty())
+                            .findByIsActiveTrueOrderBySectorOrderAsc()).filter(sectorLists -> !sectorLists.isEmpty())
                     .orElseThrow(() -> new PaczoException(SERVICE_007,INVALID_SECTOR_LIST,INVALID_SECTOR_LIST));
             sectList = sectorList.stream()
                     .map(sector -> {

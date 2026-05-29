@@ -2,6 +2,7 @@ package com.ecommerce.packzo.product.service.interfaces;
 
 import com.ecommerce.packzo.response.CategoryDto;
 import com.ecommerce.packzo.response.CategoryListResponse;
+import com.ecommerce.packzo.response.ProductDto;
 import com.ecommerce.packzo.response.SectorResponseDto;
 import java.util.Map;
 
@@ -22,4 +23,5 @@ public interface CatalogService {
      List<CategoryListResponse> getCategories();
 
 
+     CategoryDto browseAllByCategoryByPagination(String categoryValue, int prdPageNo, int prdPageSize);
 }

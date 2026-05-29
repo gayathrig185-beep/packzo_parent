@@ -14,7 +14,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("https://zm46c645-8081.inc1.devtunnels.ms","http://localhost:3000","https://j8jbjw1q-3000.inc1.devtunnels.ms","http://localhost:54768") // Angular URL
+                        .allowedOrigins("https://zm46c645-8081.inc1.devtunnels.ms","http://localhost:3000","https://j8jbjw1q-3000.inc1.devtunnels.ms","http://localhost:4200") // Angular URL
                         .allowedMethods("*")
                         .allowedHeaders("*");
             }

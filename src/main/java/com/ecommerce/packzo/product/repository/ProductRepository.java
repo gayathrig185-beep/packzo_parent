@@ -22,15 +22,16 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 
     @Query("""
-            Select p from Product p where  p.productType.typeId in (Select cp.productType.typeId from CategoryProductTypeMap cp  where cp.category.categoryId = :categoryId )
-            and p.isActive = true
+            Select p from Product p where  p.productType.typeId in (Select cp.productType.typeId from CategoryProductTypeMap cp
+              where cp.category.categoryId = :categoryId )
+            and p.isActive = true order by p.productId
             """)
     Page<Product> findProductsByCategory(String categoryId, Pageable prdPage);
 
 
     @Query("""
             Select p from Product p where  p.productType.typeId in (Select cp.productType.typeId from CategoryProductTypeMap cp  where cp.category.categoryId = :categoryId )
-            and p.isActive = true
+            and p.isActive = true order by p.productId asc
             """)
     List<Product> findProductsByCategory(String categoryId);
 
@@ -46,7 +47,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                       WHERE c.categoryId = :categoryId
                                         AND scm.sector.sectorId = :sectorId
                                         AND psm.sector.sectorId = :sectorId
-                                        AND p.isActive = true
+                                        AND p.isActive = true order by p.productId asc
             """)
     Page<Product> findProductsByCategoryAndSector(String categoryId, long sectorId, Pageable prdPage);
 
@@ -60,7 +61,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                       WHERE c.categoryId = :categoryId
                                         AND scm.sector.sectorId = :sectorId
                                         AND psm.sector.sectorId = :sectorId
-                                        AND p.isActive = true
+                                        AND p.isActive = true order by p.productId asc
             """)
     List<Product> findProductsByCategoryAndSector(String categoryId, long sectorId);
 
@@ -74,10 +75,42 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                            WHERE psm.productType = p.productType
                                              AND psm.sector.sectorId = :sectorId
                                        )AND (:productTypeName IS NULL OR LOWER(p.productType.typeName) LIKE LOWER(CONCAT('%', :productTypeName, '%')))
+                                       order by p.productId asc
             
             """)
     Page<Product> findProductsByCategoryAndSectorbyProductId(String categoryId, long sectorId, String productTypeName,Pageable prdPage);
 
 
-    //List<ProductVariant> findProductsByVariant(Long productId);
+    @Query("""
+           SELECT p FROM Product p where p.productType.typeId in (
+           SELECT pt.typeId FROM ProductType pt JOIN CategoryProductTypeMap cp 
+           ON pt.typeId = cp.productType.typeId where  cp.category.categoryId = :categoryId and LOWER(pt.typeName) LIKE LOWER(CONCAT('%', :productTypeName, '%'))
+           ) order by p.productId asc
+            
+            """)
+    Page<Product> findProductsByCategorybyProductTypeName(String categoryId, String productTypeName,Pageable prdPage);
+
+    @Query("""
+        SELECT DISTINCT p FROM Product p 
+            JOIN p.productType pt JOIN CategoryProductTypeMap cp
+            ON cp.productType = pt JOIN cp.category c WHERE p.isActive = true 
+            AND (LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(c.categoryName)
+            LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(pt.typeName)
+            LIKE LOWER(CONCAT('%', :keyword, '%')))
+    """)
+    List<Product> globalSearchProducts(String keyword,String categoryId);
+
+    @Query("""
+        SELECT DISTINCT p FROM Product p 
+            JOIN p.productType pt JOIN CategoryProductTypeMap cp
+            ON cp.productType = pt JOIN cp.category c WHERE p.isActive = true 
+            AND cp.category.categoryId = :categoryId
+            AND (LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(c.categoryName)
+            LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(pt.typeName)
+            LIKE LOWER(CONCAT('%', :keyword, '%')))
+    """)
+    List<Product> globalSearchProductsByCategory(String keyword,String categoryId);
+
 }

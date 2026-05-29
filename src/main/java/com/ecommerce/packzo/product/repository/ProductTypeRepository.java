@@ -14,9 +14,14 @@ public interface ProductTypeRepository extends JpaRepository<ProductType, String
         SELECT pt FROM CategoryProductTypeMap m
         JOIN m.productType pt
         WHERE m.category.categoryId = :categoryId
-          AND pt.isActive = true
+          AND pt.isActive = true order by pt.typeId
     """)
     List<ProductType> findByCategoryId(String categoryId);
+
+    @Query("""
+            SELECT pt.typeName FROM ProductType pt where typeId = :productTypeId
+            """)
+    String findByProductTypeId(String productTypeId);
 
     Page<ProductType> findByIsActiveTrue(Pageable pageable);
 }

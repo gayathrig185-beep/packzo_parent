@@ -43,9 +43,10 @@ public class CatalogController {
                 .orElseThrow(() -> new PaczoException(SERVICE_003, INVALID_PRD_LIST, INVALID_PRD_LIST));
     }
 
-    // Browse All
-    @GetMapping("/browse-all/{categoryId}/products")
-    public List<ProductDto> browseAllByCategory(@PathVariable String categoryId, @RequestParam String key) {
+    // see all
+    //When user clicks on see all -List all the products
+    @GetMapping("/see-all/{categoryId}/products")
+    public List<ProductDto> seeAllProducts(@PathVariable String categoryId, @RequestParam String key) {
 
         Optional.ofNullable(key).filter(StringUtils::hasText)
                 .filter(keyValue -> keyValue.equalsIgnoreCase("all"))
@@ -56,6 +57,27 @@ public class CatalogController {
         return Optional.ofNullable(catalogService.browseAllByCategory(categoryValue))
                 .orElseThrow(() -> new PaczoException(SERVICE_013, INVALID_PRD_LIST, INVALID_PRD_LIST));
     }
+
+    @GetMapping("/browse-all/{categoryId}/productsBycategory")
+    public CategoryDto getProductsByCatgeory(@PathVariable String categoryId, @RequestParam String key ,@RequestParam int prdPageNo ,
+                                                  @RequestParam int prdPageSize) {
+        CategoryDto categoryDto = null;
+        String keyData = Optional.ofNullable(key).filter(StringUtils::hasText)
+                .orElseThrow(() -> new PaczoException(SERVICE_012,INVALID_KEY_DATA,INVALID_KEY_DATA));
+        String categoryValue = Optional.ofNullable(categoryId).filter(StringUtils::hasText)
+                .orElseThrow(() -> new PaczoException(SERVICE_008,INVALID_CATEGORY_ID,INVALID_CATEGORY_ID));
+
+        if(keyData.equalsIgnoreCase("all")){
+            categoryDto = Optional.ofNullable(catalogService.browseAllByCategoryByPagination(categoryValue, prdPageNo, prdPageSize))
+                    .orElseThrow(() -> new PaczoException(SERVICE_013, INVALID_PRD_LIST, INVALID_PRD_LIST));
+        }
+        else{
+
+        }
+
+        return categoryDto;
+    }
+
 
 
     // Sector-wise
@@ -80,8 +102,8 @@ public class CatalogController {
     }
 
     @GetMapping("/productType/{productTypeName}/products")
-    public CategoryDto browseBySectorCategoryProductTypeId(@PathVariable String productTypeName, @RequestParam String categoryId, @RequestParam String sectorId, @RequestParam int prdPageNo , @RequestParam int pageSize) {
-        String sectCode = Optional.ofNullable(sectorId).filter(StringUtils::hasText)
+    public CategoryDto browseBySectorCategoryProductTypeId(@PathVariable String productTypeName, @RequestParam String categoryId, @RequestParam String businessType, @RequestParam int prdPageNo , @RequestParam int pageSize) {
+        String sectCode = Optional.ofNullable(businessType).filter(StringUtils::hasText)
                 .orElseThrow(() ->  new PaczoException(SERVICE_010,INVALID_SECTORID,INVALID_SECTORID));
         String categoryValue = Optional.ofNullable(categoryId).filter(StringUtils::hasText)
                 .orElseThrow(() -> new PaczoException(SERVICE_008,INVALID_CATEGORY_ID,INVALID_CATEGORY_ID));

@@ -14,5 +14,5 @@ public interface IndustryRepository extends JpaRepository<Sector, Long> {
 
     Optional<Sector> findBySectorCodeAndIsActiveTrue(String sectorCode);
 
-    List<Sector> findByIsActiveTrueOrderBySectorNameAsc();
+    List<Sector> findByIsActiveTrueOrderBySectorOrderAsc();
 }

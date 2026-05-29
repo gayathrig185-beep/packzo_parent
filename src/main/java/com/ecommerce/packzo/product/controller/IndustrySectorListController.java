@@ -23,7 +23,7 @@ public class IndustrySectorListController {
     }
 
     // ⭐ Get all active sectors
-    @GetMapping
+    @GetMapping("/getSectors")
     public List<SectorDto> getSectors() {
         logger.debug("IndustrySectorListController Method Starts");
         return sectorService.getAllActiveSectors();
