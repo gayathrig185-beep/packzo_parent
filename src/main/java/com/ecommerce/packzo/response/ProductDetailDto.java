@@ -6,11 +6,6 @@ import java.util.List;
 public record ProductDetailDto(
         Long productId,
         String productName,
-        String shortDescription,
-        String longDescription,
-        BigDecimal originalPrice,
-        BigDecimal discountPrice,
-        Double rating,
-        Integer totalRatings,
-        List<VariantDto> variants
+        String categoryId,
+        List<VariantGroupDto> variantGroups
 ) {}

@@ -4,10 +4,7 @@ import com.ecommerce.packzo.entity.*;
 import com.ecommerce.packzo.exception.PaczoException;
 import com.ecommerce.packzo.helper.ValidationHelper;
 import com.ecommerce.packzo.product.repository.*;
-import com.ecommerce.packzo.response.CategoryDto;
-import com.ecommerce.packzo.response.CategoryListResponse;
-import com.ecommerce.packzo.response.ProductDto;
-import com.ecommerce.packzo.response.SectorResponseDto;
+import com.ecommerce.packzo.response.*;
 import com.ecommerce.packzo.product.service.interfaces.CatalogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,14 +43,15 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     private static ProductDto apply(Product p) {
-        return new ProductDto(p.getProductId(), p.getProductName(),p.getProductType().getTypeName(), p.getOriginalPrice(), p.getDiscountPrice(), p.getTotalRatings(),validationHelper.calculationOfDiscountedPrice(p.getOriginalPrice(),p.getDiscountPrice()));
+        return new ProductDto(p.getProductId(), p.getProductName(), p.getProductType().getTypeName(), p.getOriginalPrice(), p.getDiscountPrice(), p.getTotalRatings(), validationHelper.calculationOfDiscountedPrice(p.getOriginalPrice(), p.getDiscountPrice()));
     }
 
     // 1️⃣ Browse All
     public List<CategoryDto> browseAll(int catPageNo, int catPageSize, int prdPageNo, int prdPageSize) {
-        List<CategoryDto> categoryList = new ArrayList<>();
-
+        List<CategoryDto> categoryList;
         try {
+            logger.debug("CatalogService browseAll method begins");
+
             Pageable catPage = PageRequest.of(catPageNo, catPageSize);
             Pageable prdPage = PageRequest.of(prdPageNo, prdPageSize);
 
@@ -65,6 +63,10 @@ public class CatalogServiceImpl implements CatalogService {
                     .map(cat -> mapCategoryWithProducts(cat, prdPage))
                     .toList();
 
+            logger.debug("categoryList::: -> {}", categoryList);
+
+            logger.debug("CatalogService browseAll method ends");
+
         } catch (PaczoException e) {
             throw new PaczoException(e.getErrorCode(), e.getText(), e.getErrorMessage());
         } catch (Exception e) {
@@ -75,8 +77,8 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     // 2️⃣ Sector-wise
-    public SectorResponseDto browseBySector(String sectorCode, int catPageNo, int catPageSize, int prdPageNo, int prdPageSize) {
-        SectorResponseDto sectorResponseDto = null;
+    public List<CategoryDto> browseBySector(String sectorCode, int catPageNo, int catPageSize, int prdPageNo, int prdPageSize) {
+        List<CategoryDto> categoryDtoList = new ArrayList<>();
         try {
             Pageable catPageAble = PageRequest.of(catPageNo, catPageSize);
             Pageable prdPageAble = PageRequest.of(prdPageNo, prdPageSize);
@@ -90,19 +92,9 @@ public class CatalogServiceImpl implements CatalogService {
                         .filter(prdCatList -> !prdCatList.isEmpty())
                         .orElseThrow(() -> new PaczoException(SERVICE_006, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
 
-                List<CategoryDto> categoryDtos = categories.getContent().stream()
+                categoryDtoList = categories.getContent().stream()
                         .map(cat -> mapSectorCategoryWithProducts(cat, prdPageAble, industry.get().getSectorId()))
                         .toList();
-
-                sectorResponseDto = new SectorResponseDto(
-                        industry.get().getSectorId(),
-                        industry.get().getSectorCode(),
-                        industry.get().getSectorName(),
-                        categoryDtos,
-                        categories.getNumber(),
-                        categories.getSize(),
-                        (int) categories.getTotalElements(),
-                        categories.getTotalPages(), categories.isLast());
             }
         } catch (PaczoException e) {
             throw new PaczoException(e.getErrorCode(), e.getText(), e.getErrorMessage());
@@ -110,7 +102,7 @@ public class CatalogServiceImpl implements CatalogService {
             logger.debug("Exception Occured in browseBySector Method {}", ex.getMessage());
             throw new PaczoException(SERVICE_500, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR);
         }
-        return sectorResponseDto;
+        return categoryDtoList;
     }
 
     // 3️⃣ Category-wise
@@ -122,7 +114,13 @@ public class CatalogServiceImpl implements CatalogService {
                     .filter(Category::isActive)
                     .orElseThrow(() -> new PaczoException(SERVICE_009, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
             if (category != null) {
-                productDtoList = fetchProductsBasedonSectorCategory(category, Long.parseLong(sectorId));
+
+                Optional<Sector> industry = Optional.ofNullable(industryRepository
+                                .findBySectorCodeAndIsActiveTrue(sectorId))
+                        .orElseThrow(() -> new PaczoException(SERVICE_004, SECTOR_NOT_FOUND, SECTOR_NOT_FOUND));
+                if(industry.isPresent()){
+                    productDtoList = fetchProductsBasedonSectorCategory(category, industry.get().getSectorId());
+                }
             }
         } catch (PaczoException e) {
             throw new PaczoException(e.getErrorCode(), e.getText(), e.getErrorMessage());
@@ -133,16 +131,43 @@ public class CatalogServiceImpl implements CatalogService {
         return productDtoList;
     }
 
+
+    public CategoryDto browseBySectorByPagination(String sector, String categoryValue, int prdPageNo, int prdPageSize) {
+        CategoryDto categoryDto = null;
+        try {
+            Pageable prdPageAble = PageRequest.of(prdPageNo, prdPageSize);
+            Optional<Sector> industry = Optional.ofNullable(industryRepository
+                            .findBySectorCodeAndIsActiveTrue(sector))
+                    .orElseThrow(() -> new PaczoException(SERVICE_014, SECTOR_NOT_FOUND, SECTOR_NOT_FOUND));
+            if (industry.isPresent()) {
+                Category category = categoryRepository.findById(categoryValue)
+                        .filter(Category::isActive)
+                        .orElseThrow(() -> new PaczoException(SERVICE_011, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
+
+                categoryDto = mapSectorCategoryWithProducts(category, prdPageAble, industry.get().getSectorId());
+            }
+
+        } catch (PaczoException e) {
+            throw new PaczoException(e.getErrorCode(), e.getText(), e.getErrorMessage());
+        } catch (Exception ex) {
+            logger.debug("Exception Occured in browseByCategory Method {}", ex.getMessage());
+            throw new PaczoException(SERVICE_500, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR);
+        }
+        return categoryDto;
+    }
+
     private List<ProductDto> fetchProductsBasedonSectorCategory(Category category, long sectorId) {
         List<ProductDto> productDtoList;
-        try{
-           List<Product> productsList = Optional.ofNullable(productRepository.findProductsByCategoryAndSector(category.getCategoryId(),sectorId))
-                   .filter(prod -> !prod.isEmpty()).orElseThrow(() -> new PaczoException(SERVICE_009, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
+        try {
+            List<Product> productsList = Optional.ofNullable(productRepository.findProductsByCategoryAndSector(category.getCategoryId(), sectorId))
+                    .filter(prod -> !prod.isEmpty()).orElseThrow(() -> new PaczoException(SERVICE_019, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
 
-           productDtoList = productsList.stream().map(product -> new ProductDto(product.getProductId(),product.getProductName(), product.getProductType().getTypeName(),product.getOriginalPrice(),product.getDiscountPrice(),product.getTotalRatings(),validationHelper.calculationOfDiscountedPrice(product.getOriginalPrice(),product.getDiscountPrice())))
-                   .toList();
-        }catch (Exception e) {
-            logger.debug("Exception Occured in mapCategoryWithProducts Method {}", e.getMessage());
+            productDtoList = productsList.stream().map(product -> new ProductDto(product.getProductId(), product.getProductName(), product.getProductType().getTypeName(), product.getOriginalPrice(), product.getDiscountPrice(), product.getTotalRatings(), validationHelper.calculationOfDiscountedPrice(product.getOriginalPrice(), product.getDiscountPrice())))
+                    .toList();
+        } catch (PaczoException e) {
+            throw new PaczoException(e.getErrorCode(), e.getText(), e.getErrorMessage());
+        }  catch (Exception e) {
+            logger.debug("Exception Occured in fetchProductsBasedonSectorCategory Method {}", e.getMessage());
             throw new PaczoException(SERVICE_500, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR);
         }
         return productDtoList;
@@ -157,6 +182,7 @@ public class CatalogServiceImpl implements CatalogService {
         int totalpages = 0;
         boolean islast = false;
         List<String> subList = new ArrayList<>();
+        ProductPageDto productPageDto = new ProductPageDto();
         try {
 
             Optional<Page<Product>> products = Optional.ofNullable(productRepository.findProductsByCategoryAndSector(category.getCategoryId(), sectorId, prdPage));
@@ -173,11 +199,20 @@ public class CatalogServiceImpl implements CatalogService {
                         .map(ProductType::getTypeName)
                         .toList();
 
+
+                productPageDto.setProducts(productDtos);
+                productPageDto.setPage(pageNo);
+                productPageDto.setSize(pageSize);
+                productPageDto.setTotalElements(totalElements);
+                productPageDto.setTotalPages(totalpages);
+                productPageDto.setLast(islast);
+
+
             }
             categoryDto = new CategoryDto(
                     category.getCategoryId(),
-                    category.getCategoryName(),subList,
-                    productDtos, pageNo, pageSize, totalElements, totalpages, islast
+                    category.getCategoryName(), subList,
+                    productPageDto
             );
         } catch (Exception e) {
             logger.debug("Exception Occured in mapCategoryWithProducts Method {}", e.getMessage());
@@ -195,12 +230,16 @@ public class CatalogServiceImpl implements CatalogService {
         Long totalElements = 0L;
         int totalpages = 0;
         boolean islast = false;
+        ProductPageDto productPageDto = new ProductPageDto();
         try {
+            logger.debug("mapCategoryWithProducts(Category category, Pageable pageValue) method begins");
 
             Optional<Page<Product>> products = Optional.ofNullable(productRepository.findProductsByCategory(category.getCategoryId(), pageValue))
                     .filter(prdList -> !prdList.isEmpty());
 
-            if (products.isPresent()) {
+            if(products.isPresent()){
+                logger.debug("ProductsList {}", products.get().getContent());
+
                 productDtos = products.get().getContent().stream().map(CatalogServiceImpl::apply)
                         .toList();
                 pageNo = products.get().getNumber();
@@ -209,17 +248,26 @@ public class CatalogServiceImpl implements CatalogService {
                 totalElements = products.get().getTotalElements();
                 islast = products.get().isLast();
                 subList.addFirst("All");
-                List<String> subLists = productTypeRepository.findByCategoryId(category.getCategoryId()).stream()
-                                        .map(ProductType::getTypeName)
-                                        .toList();
-                subList.addAll(subLists);
-            }
 
+                List<String> subLists = productTypeRepository.findByCategoryId(category.getCategoryId()).stream()
+                        .map(ProductType::getTypeName)
+                        .toList();
+                subList.addAll(subLists);
+
+                productPageDto.setProducts(productDtos);
+                productPageDto.setPage(pageNo);
+                productPageDto.setSize(pageSize);
+                productPageDto.setTotalElements(totalElements);
+                productPageDto.setTotalPages(totalpages);
+                productPageDto.setLast(islast);
+            }
             categoryDto = new CategoryDto(
                     category.getCategoryId(),
-                    category.getCategoryName(),subList,
-                    productDtos, pageNo, pageSize, totalElements, totalpages, islast
+                    category.getCategoryName(), subList,
+                    productPageDto
             );
+            logger.debug("Category value {}", categoryDto);
+            logger.debug("mapCategoryWithProducts(Category category, Pageable pageValue) method ends");
         } catch (Exception e) {
             logger.debug("Exception Occured in mapCategoryWithProducts Method {}", e.getMessage());
             throw new PaczoException(SERVICE_500, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR);
@@ -234,7 +282,7 @@ public class CatalogServiceImpl implements CatalogService {
         try {
             category = categoryRepository.findById(categoryId)
                     .filter(Category::isActive)
-                    .orElseThrow(() -> new PaczoException(SERVICE_009, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
+                    .orElseThrow(() -> new PaczoException(SERVICE_020, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
             if (category != null) {
                 productsDtoList = fetchAllProductByCategoryId(category);
             }
@@ -249,11 +297,11 @@ public class CatalogServiceImpl implements CatalogService {
 
     private List<ProductDto> fetchAllProductByCategoryId(Category category) {
         List<ProductDto> productsDtoList;
-        try{
+        try {
             List<Product> productsList = Optional.ofNullable(productRepository.findProductsByCategory(category.getCategoryId()))
-                    .filter(prdList -> !prdList.isEmpty()).orElseThrow(() -> new PaczoException(SERVICE_009, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND) );
-            productsDtoList = productsList.stream().map(product -> new ProductDto(product.getProductId(),product.getProductName(),product.getProductType().getTypeName(),product.getOriginalPrice(),product.getDiscountPrice(),product.getTotalRatings(),validationHelper.calculationOfDiscountedPrice(product.getOriginalPrice(),product.getDiscountPrice()))).toList();
-        }catch (PaczoException e) {
+                    .filter(prdList -> !prdList.isEmpty()).orElseThrow(() -> new PaczoException(SERVICE_021, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
+            productsDtoList = productsList.stream().map(product -> new ProductDto(product.getProductId(), product.getProductName(), product.getProductType().getTypeName(), product.getOriginalPrice(), product.getDiscountPrice(), product.getTotalRatings(), validationHelper.calculationOfDiscountedPrice(product.getOriginalPrice(), product.getDiscountPrice()))).toList();
+        } catch (PaczoException e) {
             throw new PaczoException(e.getErrorCode(), e.getText(), e.getErrorMessage());
         } catch (Exception ex) {
             logger.debug("Exception Occured in browseByCategory Method {}", ex.getMessage());
@@ -267,17 +315,22 @@ public class CatalogServiceImpl implements CatalogService {
         try {
             Pageable prdPageAble = PageRequest.of(prdPageNo, prdPageSize);
             List<String> subList = new ArrayList<>();
+            List<String> businessTypeList = Arrays.asList("CORP", "CATT", "CLD", "WED", "REST", "HOTEL", "BIO", "BLK", "HOSP", "DECOR");
             Optional<Page<Product>> products = Optional.empty();
             Category category = categoryRepository.findById(categoryValue)
                     .filter(Category::isActive)
-                    .orElseThrow(() -> new PaczoException(SERVICE_009, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
-            if(sectCode.equalsIgnoreCase("all")){
-                products = Optional.ofNullable(productRepository.findProductsByCategorybyProductTypeName(categoryValue,productTypeName,prdPageAble));
-            }else{
-                products = Optional.ofNullable(productRepository.findProductsByCategoryAndSectorbyProductId(categoryValue, Long.parseLong(sectCode), productTypeName,prdPageAble));
-
+                    .orElseThrow(() -> new PaczoException(SERVICE_023, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
+            if (sectCode.equalsIgnoreCase("all")) {
+                products = Optional.ofNullable(productRepository.findProductsByCategorybyProductTypeName(categoryValue, productTypeName, prdPageAble));
+            } else {
+                if(businessTypeList.contains(sectCode)){
+                    products = Optional.ofNullable(productRepository.findProductsByCategoryAndSectorbyProductId(categoryValue, Long.parseLong(sectCode), productTypeName, prdPageAble));
+                }else{
+                    throw new PaczoException(SERVICE_025, INVALID_SECTORID, INVALID_SECTORID);
+                }
             }
             List<ProductDto> productDtos = List.of();
+            ProductPageDto productPageDto = new ProductPageDto();
             int pageNo = 0;
             int pageSize = 0;
             int totalpages = 0;
@@ -292,15 +345,21 @@ public class CatalogServiceImpl implements CatalogService {
                 totalElements = products.get().getTotalElements();
                 islast = products.get().isLast();
                 subList.add("All");
-                List<String> subLists =  productTypeRepository.findByCategoryId(category.getCategoryId()).stream()
+                List<String> subLists = productTypeRepository.findByCategoryId(category.getCategoryId()).stream()
                         .map(ProductType::getTypeName)
                         .toList();
                 subList.addAll(subLists);
+                productPageDto.setProducts(productDtos);
+                productPageDto.setPage(pageNo);
+                productPageDto.setSize(pageSize);
+                productPageDto.setTotalElements(totalElements);
+                productPageDto.setTotalPages(totalpages);
+                productPageDto.setLast(islast);
             }
             categoryDto = new CategoryDto(
                     category.getCategoryId(),
                     category.getCategoryName(), subList,
-                    productDtos, pageNo, pageSize, totalElements, totalpages, islast
+                    productPageDto
             );
         } catch (PaczoException e) {
             throw new PaczoException(e.getErrorCode(), e.getText(), e.getErrorMessage());
@@ -312,8 +371,8 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
-    public Map<String, List<String>> getFilterValueForBrowseAll(){
-        try{
+    public Map<String, List<String>> getFilterValueForBrowseAll() {
+        try {
             List<String> categoryIdList = Optional.ofNullable(categoryRepository.findAllCategories())
                     .filter(cateList -> !cateList.isEmpty()).orElseThrow();
 
@@ -337,8 +396,8 @@ public class CatalogServiceImpl implements CatalogService {
 
     @Override
     public Map<String, List<String>> getFilterValueBySectorCode(String sectorId) {
-        try{
-            List<String> catList= Optional.ofNullable(sectCatMapRepo.findCategoriesBysector(sectorId))
+        try {
+            List<String> catList = Optional.ofNullable(sectCatMapRepo.findCategoriesBysector(sectorId))
                     .filter(sectList -> !sectList.isEmpty()).orElseThrow();
             return catList.stream()
                     .collect(Collectors.toMap(
@@ -349,7 +408,7 @@ public class CatalogServiceImpl implements CatalogService {
                             (existing, replacement) -> existing,             // Merge function (handles duplicate keys)
                             LinkedHashMap::new
                     ));
-        }catch (PaczoException e) {
+        } catch (PaczoException e) {
             throw new PaczoException(e.getErrorCode(), e.getText(), e.getErrorMessage());
         } catch (Exception ex) {
             logger.debug("Exception Occured in browseByCategory Method {}", ex.getMessage());
@@ -357,10 +416,10 @@ public class CatalogServiceImpl implements CatalogService {
         }
     }
 
-    public List<CategoryListResponse> getCategories(){
+    public List<CategoryListResponse> getCategories() {
         List<CategoryListResponse> catListResponse = new ArrayList<>();
         List<Category> categoryList = categoryRepository.findAllCategoriesList();
-        for(Category cat : categoryList){
+        for (Category cat : categoryList) {
             CategoryListResponse categoryListResponse = new CategoryListResponse();
             categoryListResponse.setCategoryName(cat.getCategoryName());
             categoryListResponse.setCategoryUrl(null);
@@ -373,15 +432,15 @@ public class CatalogServiceImpl implements CatalogService {
     @Override
     public CategoryDto browseAllByCategoryByPagination(String categoryValue, int prdPageNo, int prdPageSize) {
         CategoryDto categoryDto;
-        try{
+        try {
             Pageable prdPageAble = PageRequest.of(prdPageNo, prdPageSize);
             Category category = categoryRepository.findById(categoryValue)
                     .filter(Category::isActive)
-                    .orElseThrow(() -> new PaczoException(SERVICE_009, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
+                    .orElseThrow(() -> new PaczoException(SERVICE_022, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
 
-            categoryDto = mapCategoryWithProducts(category,prdPageAble);
+            categoryDto = mapCategoryWithProducts(category, prdPageAble);
 
-        }catch (PaczoException e) {
+        } catch (PaczoException e) {
             throw new PaczoException(e.getErrorCode(), e.getText(), e.getErrorMessage());
         } catch (Exception ex) {
             logger.debug("Exception Occured in browseByCategory Method {}", ex.getMessage());

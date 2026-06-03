@@ -13,5 +13,5 @@ public class VariantGroupDto {
 
     private String capacity;              // 90ML, 120ML
 
-    private List<OptionDto> options;      // pieces under this capacity
+    private List<VariantDto> variantDtoList;      // pieces under this capacity
 }

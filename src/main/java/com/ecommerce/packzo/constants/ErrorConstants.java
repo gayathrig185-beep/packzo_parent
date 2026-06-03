@@ -17,7 +17,18 @@ public final class ErrorConstants {
     public static final String SERVICE_012 = "SER012";
     public static final String SERVICE_013 = "SER013";
     public static final String SERVICE_014 = "SER014";
-
+    public static final String SERVICE_015 = "SER015";
+    public static final String SERVICE_016 = "SER016";
+    public static final String SERVICE_017 = "SER017";
+    public static final String SERVICE_018 = "SER018";
+    public static final String SERVICE_019 = "SER019";
+    public static final String SERVICE_020 = "SER020";
+    public static final String SERVICE_021 = "SER021";
+    public static final String SERVICE_022 = "SER022";
+    public static final String SERVICE_023 = "SER023";
+    public static final String SERVICE_024 = "SER024";
+    public static final String SERVICE_025 = "SER025";
+    public static final String SERVICE_026 = "SER026";
 
 
 
@@ -30,6 +41,8 @@ public final class ErrorConstants {
     public static final String INVALID_SECTOR_LIST = "No Sectors found . Please try again later";
     public static final String INVALID_CATEGORY_ID = "Category data is empty or null to browse products. Please try again later";
     public static final String INVALID_PRD_DATA = "No product founds for selected product category . Please try again later";
-    public static final String INVALID_SECTORID = "Invalid Sector id";
+    public static final String INVALID_SECTORID = "Invalid business type passed in the request";
+
+    public static final String INVALID_SUBCATEGORY_NAME = "Subcategory name cannot be null or Empty. You need to pass subcategory to filter the product";
 
 }

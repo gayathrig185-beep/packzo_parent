@@ -5,11 +5,9 @@ import com.ecommerce.packzo.exception.PaczoException;
 import com.ecommerce.packzo.response.CategoryDto;
 import com.ecommerce.packzo.response.CategoryListResponse;
 import com.ecommerce.packzo.response.ProductDto;
-import com.ecommerce.packzo.response.SectorResponseDto;
 import com.ecommerce.packzo.product.service.impl.CatalogServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,104 +29,100 @@ public class CatalogController {
 
     // Browse All
     @GetMapping("/browse-all")
-    public List<CategoryDto> browseAll(@RequestParam String key, @RequestParam int catPageNo, @RequestParam int catPageSize, @RequestParam int prdPageNo ,
-                                       @RequestParam int prdPageSize) {
+    public List<CategoryDto> browseByBusinessType(@RequestParam String key, @RequestParam int catPageNo, @RequestParam int catPageSize, @RequestParam int prdPageNo,
+                                                  @RequestParam int prdPageSize) {
+        logger.debug("CatalogController:::-> method begins");
+        logger.debug("Params:: key {}, catPageNo {} , catPageSize {} , prdPageNo {}, prdPageSize {}",key, catPageNo, catPageSize, prdPageNo, prdPageSize);
+        List<CategoryDto> categoryList;
 
-        Optional.ofNullable(key).filter(StringUtils::hasText)
-                .filter(keyValue -> keyValue.equalsIgnoreCase("all"))
-                .orElseThrow(() -> new PaczoException(SERVICE_002,INVALID_KEY_DATA,INVALID_KEY_DATA));
+        List<String> businessTypeList = Arrays.asList("CORP", "CATT", "CLD", "WED", "REST", "HOTEL", "BIO", "BLK", "HOSP", "DECOR");
 
-        return Optional.ofNullable(catalogService.browseAll(catPageNo, catPageSize, prdPageNo, prdPageSize))
-                .filter(catList -> !catList.isEmpty())
-                .orElseThrow(() -> new PaczoException(SERVICE_003, INVALID_PRD_LIST, INVALID_PRD_LIST));
+        key = Optional.ofNullable(key).filter(StringUtils::hasText)
+                .orElseThrow(() -> new PaczoException(SERVICE_002, INVALID_KEY_DATA, INVALID_KEY_DATA));
+
+        if (key.equalsIgnoreCase("all")) {
+            categoryList = Optional.ofNullable(catalogService.browseAll(catPageNo, catPageSize, prdPageNo, prdPageSize))
+                    .filter(catList -> !catList.isEmpty())
+                    .orElseThrow(() -> new PaczoException(SERVICE_003, INVALID_PRD_LIST, INVALID_PRD_LIST));
+        } else {
+            if (businessTypeList.contains(key)) {
+                categoryList = Optional.ofNullable(catalogService.browseBySector(key, catPageNo, catPageSize, prdPageNo, prdPageSize))
+                        .filter(catList -> !catList.isEmpty()).orElseThrow(() -> new PaczoException(SERVICE_003, INVALID_PRD_LIST, INVALID_PRD_LIST));
+            } else {
+               throw new PaczoException(SERVICE_015, INVALID_SECTORID, INVALID_SECTORID);
+            }
+        }
+        logger.debug("CategoryList:::{}",categoryList);
+        logger.debug("CatalogController:::-> method ends");
+        return categoryList;
     }
 
     // see all
     //When user clicks on see all -List all the products
     @GetMapping("/see-all/{categoryId}/products")
     public List<ProductDto> seeAllProducts(@PathVariable String categoryId, @RequestParam String key) {
-
-        Optional.ofNullable(key).filter(StringUtils::hasText)
-                .filter(keyValue -> keyValue.equalsIgnoreCase("all"))
-                .orElseThrow(() -> new PaczoException(SERVICE_012,INVALID_KEY_DATA,INVALID_KEY_DATA));
+        List<String> businessTypeList = Arrays.asList("CORP", "CATT", "CLD", "WED", "REST", "HOTEL", "BIO", "BLK", "HOSP", "DECOR");
+        List<ProductDto> productDtoList = new ArrayList<>();
+        
+        key = Optional.ofNullable(key).filter(StringUtils::hasText)
+                .orElseThrow(() -> new PaczoException(SERVICE_012, INVALID_KEY_DATA, INVALID_KEY_DATA));
         String categoryValue = Optional.ofNullable(categoryId).filter(StringUtils::hasText)
-                .orElseThrow(() -> new PaczoException(SERVICE_008,INVALID_CATEGORY_ID,INVALID_CATEGORY_ID));
-
-        return Optional.ofNullable(catalogService.browseAllByCategory(categoryValue))
-                .orElseThrow(() -> new PaczoException(SERVICE_013, INVALID_PRD_LIST, INVALID_PRD_LIST));
+                .orElseThrow(() -> new PaczoException(SERVICE_008, INVALID_CATEGORY_ID, INVALID_CATEGORY_ID));
+        if(key.equalsIgnoreCase("all")){
+            productDtoList = Optional.ofNullable(catalogService.browseAllByCategory(categoryValue))
+                    .orElseThrow(() -> new PaczoException(SERVICE_013, INVALID_PRD_LIST, INVALID_PRD_LIST));
+        }else{
+            if (businessTypeList.contains(key)) {
+                productDtoList = Optional.ofNullable(catalogService.browseBySectorCategory(key, categoryValue)).filter(catList -> !catList.isEmpty())
+                        .orElseThrow(() -> new PaczoException(SERVICE_024, INVALID_PRD_LIST, INVALID_PRD_LIST));
+            } else {
+                throw new PaczoException(SERVICE_015, INVALID_SECTORID, INVALID_SECTORID);
+            }
+        }
+        return productDtoList;
     }
 
+    //seeALL
     @GetMapping("/browse-all/{categoryId}/productsBycategory")
-    public CategoryDto getProductsByCatgeory(@PathVariable String categoryId, @RequestParam String key ,@RequestParam int prdPageNo ,
-                                                  @RequestParam int prdPageSize) {
+    public CategoryDto getProductsByCatgeory(@PathVariable String categoryId, @RequestParam String key, @RequestParam int prdPageNo,
+                                             @RequestParam int prdPageSize) {
         CategoryDto categoryDto = null;
         String keyData = Optional.ofNullable(key).filter(StringUtils::hasText)
-                .orElseThrow(() -> new PaczoException(SERVICE_012,INVALID_KEY_DATA,INVALID_KEY_DATA));
+                .orElseThrow(() -> new PaczoException(SERVICE_012, INVALID_KEY_DATA, INVALID_KEY_DATA));
         String categoryValue = Optional.ofNullable(categoryId).filter(StringUtils::hasText)
-                .orElseThrow(() -> new PaczoException(SERVICE_008,INVALID_CATEGORY_ID,INVALID_CATEGORY_ID));
+                .orElseThrow(() -> new PaczoException(SERVICE_008, INVALID_CATEGORY_ID, INVALID_CATEGORY_ID));
 
-        if(keyData.equalsIgnoreCase("all")){
+        List<String> businessTypeList = Arrays.asList("CORP", "CATT", "CLD", "WED", "REST", "HOTEL", "BIO", "BLK", "HOSP", "DECOR");
+
+        if (keyData.equalsIgnoreCase("all")) {
             categoryDto = Optional.ofNullable(catalogService.browseAllByCategoryByPagination(categoryValue, prdPageNo, prdPageSize))
-                    .orElseThrow(() -> new PaczoException(SERVICE_013, INVALID_PRD_LIST, INVALID_PRD_LIST));
+                    .orElseThrow(() -> new PaczoException(SERVICE_016, INVALID_PRD_LIST, INVALID_PRD_LIST));
+        } else {
+            if (businessTypeList.contains(key)) {
+                categoryDto = Optional.ofNullable(catalogService.browseBySectorByPagination(keyData, categoryValue, prdPageNo, prdPageSize))
+                        .orElseThrow(() -> new PaczoException(SERVICE_017, INVALID_PRD_LIST, INVALID_PRD_LIST));
+            }else{
+                throw new PaczoException(SERVICE_018, INVALID_SECTORID, INVALID_SECTORID);
+            }
         }
-        else{
-
-        }
-
         return categoryDto;
     }
 
 
-
-    // Sector-wise
-    @GetMapping("/sectors/{sectorCode}/products")
-    public ResponseEntity<SectorResponseDto> browseBySector(
-            @PathVariable String sectorCode, @RequestParam int catPageNo, @RequestParam int catPageSize, @RequestParam int prdPageNo ,
-            @RequestParam int prdPageSize) {
-        String sectCode = Optional.ofNullable(sectorCode).filter(StringUtils::hasText)
-                .orElseThrow(() ->  new PaczoException(SERVICE_001,INVALID_SECTORCODE,INVALID_SECTORCODE));
-        return ResponseEntity.ok(
-                catalogService.browseBySector(sectCode, catPageNo, catPageSize, prdPageNo, prdPageSize));
-    }
-
-    // Category-wise
-    @GetMapping("/category/{categoryId}/products")
-    public List<ProductDto> browseBySectorCategory(@PathVariable String categoryId, @RequestParam String sectorId) {
-        String sectCode = Optional.ofNullable(sectorId).filter(StringUtils::hasText)
-                .orElseThrow(() ->  new PaczoException(SERVICE_010,INVALID_SECTORID,INVALID_SECTORID));
-        String categoryValue = Optional.ofNullable(categoryId).filter(StringUtils::hasText)
-                .orElseThrow(() -> new PaczoException(SERVICE_008,INVALID_CATEGORY_ID,INVALID_CATEGORY_ID));
-        return catalogService.browseBySectorCategory(sectCode,categoryValue);
-    }
-
     @GetMapping("/productType/{productTypeName}/products")
-    public CategoryDto browseBySectorCategoryProductTypeId(@PathVariable String productTypeName, @RequestParam String categoryId, @RequestParam String businessType, @RequestParam int prdPageNo , @RequestParam int pageSize) {
+    public CategoryDto filterByProductTypeId(@PathVariable String productTypeName, @RequestParam String categoryId, @RequestParam String businessType, @RequestParam int prdPageNo, @RequestParam int pageSize) {
         String sectCode = Optional.ofNullable(businessType).filter(StringUtils::hasText)
-                .orElseThrow(() ->  new PaczoException(SERVICE_010,INVALID_SECTORID,INVALID_SECTORID));
+                .orElseThrow(() -> new PaczoException(SERVICE_010, INVALID_SECTORID, INVALID_SECTORID));
         String categoryValue = Optional.ofNullable(categoryId).filter(StringUtils::hasText)
-                .orElseThrow(() -> new PaczoException(SERVICE_008,INVALID_CATEGORY_ID,INVALID_CATEGORY_ID));
-        return catalogService.browseByProductTypeId(sectCode,categoryValue,productTypeName,prdPageNo, pageSize);
+                .orElseThrow(() -> new PaczoException(SERVICE_008, INVALID_CATEGORY_ID, INVALID_CATEGORY_ID));
+        return catalogService.browseByProductTypeId(sectCode, categoryValue, productTypeName, prdPageNo, pageSize);
     }
 
-    @GetMapping("/productType/filterList/{key}")
-    public Map<String,List<String>> filterProductTypeList(@PathVariable String key){
-        Map<String,List<String>> filterMap = new HashMap<>();
-        String keyValue = Optional.ofNullable(key).filter(StringUtils::hasText).orElseThrow();
-        if(keyValue.equals("all")){
-           filterMap =  catalogService.getFilterValueForBrowseAll();
-        }else{
-            filterMap = catalogService.getFilterValueBySectorCode(key);
-        }
-        return filterMap;
-
-    }
 
     @GetMapping("/getCategories/{key}")
-    public List<CategoryListResponse> getCategoryList(@PathVariable String key){
+    public List<CategoryListResponse> getCategoryList(@PathVariable String key) {
         return catalogService.getCategories();
     }
-
-
 
 
 }

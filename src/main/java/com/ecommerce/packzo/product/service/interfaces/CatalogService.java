@@ -1,9 +1,7 @@
 package com.ecommerce.packzo.product.service.interfaces;
 
-import com.ecommerce.packzo.response.CategoryDto;
-import com.ecommerce.packzo.response.CategoryListResponse;
-import com.ecommerce.packzo.response.ProductDto;
-import com.ecommerce.packzo.response.SectorResponseDto;
+import com.ecommerce.packzo.response.*;
+
 import java.util.Map;
 
 import java.util.List;
@@ -12,7 +10,7 @@ public interface CatalogService {
 
      List<CategoryDto> browseAll(int catPageNo, int catPageSize, int prdPageNo , int prdPageSize);
 
-     SectorResponseDto browseBySector(String sectorCode, int catPageNo, int catPageSize, int prdPageNo, int prdPageSize);
+     List<CategoryDto> browseBySector(String sectorCode, int catPageNo, int catPageSize, int prdPageNo, int prdPageSize);
 
      CategoryDto browseByProductTypeId(String sectCode, String categoryValue, String productTypeId, int prdPageNo, int prdPageSize);
 
@@ -24,4 +22,6 @@ public interface CatalogService {
 
 
      CategoryDto browseAllByCategoryByPagination(String categoryValue, int prdPageNo, int prdPageSize);
+
+     CategoryDto browseBySectorByPagination(String sector, String categoryValue, int prdPageNo, int prdPageSize);
 }
