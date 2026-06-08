@@ -321,10 +321,23 @@ public class CatalogServiceImpl implements CatalogService {
                     .filter(Category::isActive)
                     .orElseThrow(() -> new PaczoException(SERVICE_023, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
             if (sectCode.equalsIgnoreCase("all")) {
-                products = Optional.ofNullable(productRepository.findProductsByCategorybyProductTypeName(categoryValue, productTypeName, prdPageAble));
+                if(productTypeName.equalsIgnoreCase("all")){
+                    products = Optional.ofNullable(productRepository.findProductsByCategory(categoryValue,prdPageAble));
+                }else{
+                    products = Optional.ofNullable(productRepository.findProductsByCategorybyProductTypeName(categoryValue, productTypeName, prdPageAble));
+                }
             } else {
                 if(businessTypeList.contains(sectCode)){
-                    products = Optional.ofNullable(productRepository.findProductsByCategoryAndSectorbyProductId(categoryValue, Long.parseLong(sectCode), productTypeName, prdPageAble));
+                     Optional<Sector> industry = Optional.ofNullable(industryRepository.findBySectorCodeAndIsActiveTrue(sectCode))
+                             .orElseThrow(() -> new PaczoException(SERVICE_004, SECTOR_NOT_FOUND, SECTOR_NOT_FOUND));
+                     if(industry.isPresent()){
+                         if(productTypeName.equalsIgnoreCase("all")){
+                             products = Optional.ofNullable(productRepository.findProductsByCategoryAndSector(category.getCategoryId(), industry.get().getSectorId(), prdPageAble));
+                         }
+                         else{
+                             products = Optional.ofNullable(productRepository.findProductsByCategoryAndSectorbyProductId(categoryValue, Long.parseLong(sectCode), productTypeName, prdPageAble));
+                         }
+                     }
                 }else{
                     throw new PaczoException(SERVICE_025, INVALID_SECTORID, INVALID_SECTORID);
                 }
