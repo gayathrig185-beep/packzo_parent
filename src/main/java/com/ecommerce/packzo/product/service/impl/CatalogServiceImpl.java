@@ -195,11 +195,11 @@ public class CatalogServiceImpl implements CatalogService {
                 totalpages = products.get().getTotalPages();
                 totalElements = products.get().getTotalElements();
                 islast = products.get().isLast();
-                subList = productTypeRepository.findByCategoryId(category.getCategoryId()).stream()
+                subList.addFirst("All");
+                List<String> subLists = productTypeRepository.findByCategoryId(category.getCategoryId()).stream()
                         .map(ProductType::getTypeName)
                         .toList();
-
-
+                subList.addAll(subLists);
                 productPageDto.setProducts(productDtos);
                 productPageDto.setPage(pageNo);
                 productPageDto.setSize(pageSize);
@@ -335,7 +335,7 @@ public class CatalogServiceImpl implements CatalogService {
                              products = Optional.ofNullable(productRepository.findProductsByCategoryAndSector(category.getCategoryId(), industry.get().getSectorId(), prdPageAble));
                          }
                          else{
-                             products = Optional.ofNullable(productRepository.findProductsByCategoryAndSectorbyProductId(categoryValue, Long.parseLong(sectCode), productTypeName, prdPageAble));
+                             products = Optional.ofNullable(productRepository.findProductsByCategoryAndSectorbyProductId(categoryValue, industry.get().getSectorId(), productTypeName, prdPageAble));
                          }
                      }
                 }else{
