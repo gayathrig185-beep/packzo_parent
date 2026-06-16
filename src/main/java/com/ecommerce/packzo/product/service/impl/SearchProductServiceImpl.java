@@ -27,12 +27,10 @@ public class SearchProductServiceImpl implements SearchProductService {
         //Pageable pageable = PageRequest.of(page, size);
         if(categoryId.equalsIgnoreCase("all")){
             products = productRepo.globalSearchProducts(keyword, categoryId);
-
         }
         else{
             products = productRepo.globalSearchProductsByCategory(keyword, categoryId);
         }
-
         return mapToDto(products);
     }
 

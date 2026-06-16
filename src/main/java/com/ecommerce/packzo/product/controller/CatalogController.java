@@ -121,7 +121,7 @@ public class CatalogController {
 
     @GetMapping("/getCategories/{key}")
     public List<CategoryListResponse> getCategoryList(@PathVariable String key) {
-        return catalogService.getCategories();
+        return catalogService.getCategories(key);
     }
 
 

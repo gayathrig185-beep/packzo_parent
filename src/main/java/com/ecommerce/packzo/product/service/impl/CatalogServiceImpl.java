@@ -407,7 +407,7 @@ public class CatalogServiceImpl implements CatalogService {
         }
     }
 
-    @Override
+    /*@Override
     public Map<String, List<String>> getFilterValueBySectorCode(String sectorId) {
         try {
             List<String> catList = Optional.ofNullable(sectCatMapRepo.findCategoriesBysector(sectorId))
@@ -427,19 +427,33 @@ public class CatalogServiceImpl implements CatalogService {
             logger.debug("Exception Occured in browseByCategory Method {}", ex.getMessage());
             throw new PaczoException(SERVICE_500, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR);
         }
-    }
+    }*/
 
-    public List<CategoryListResponse> getCategories() {
+    public List<CategoryListResponse> getCategories(String key) {
         List<CategoryListResponse> catListResponse = new ArrayList<>();
-        List<Category> categoryList = categoryRepository.findAllCategoriesList();
-        for (Category cat : categoryList) {
-            CategoryListResponse categoryListResponse = new CategoryListResponse();
-            categoryListResponse.setCategoryName(cat.getCategoryName());
-            categoryListResponse.setCategoryUrl(null);
-            categoryListResponse.setCategoryId(cat.getCategoryId());
-            catListResponse.add(categoryListResponse);
+        List<Category> categoryList = new ArrayList<>();
+        if(key.equalsIgnoreCase("all")){
+             categoryList = categoryRepository.findAllCategoriesList();
+        }else{
+            Optional<Sector> industry = Optional.ofNullable(industryRepository
+                            .findBySectorCodeAndIsActiveTrue(key))
+                    .orElseThrow(() -> new PaczoException(SERVICE_014, SECTOR_NOT_FOUND, SECTOR_NOT_FOUND));
+            if(industry.isPresent()){
+                categoryList = sectCatMapRepo.findCategoriesListBysector(industry.get().getSectorId());
+            }
+
         }
-        return catListResponse;
+
+        if(categoryList!=null && !categoryList.isEmpty()){
+            for (Category cat : categoryList) {
+                CategoryListResponse categoryListResponse = new CategoryListResponse();
+                categoryListResponse.setCategoryName(cat.getCategoryName());
+                categoryListResponse.setCategoryUrl(null);
+                categoryListResponse.setCategoryId(cat.getCategoryId());
+                catListResponse.add(categoryListResponse);
+            }
+        }
+            return catListResponse;
     }
 
     @Override

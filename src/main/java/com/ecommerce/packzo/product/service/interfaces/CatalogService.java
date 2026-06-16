@@ -16,9 +16,9 @@ public interface CatalogService {
 
      Map<String, List<String>> getFilterValueForBrowseAll();
 
-     Map<String, List<String>> getFilterValueBySectorCode(String key);
+     //Map<String, List<String>> getFilterValueBySectorCode(String key);
 
-     List<CategoryListResponse> getCategories();
+     List<CategoryListResponse> getCategories(String sectorId);
 
 
      CategoryDto browseAllByCategoryByPagination(String categoryValue, int prdPageNo, int prdPageSize);

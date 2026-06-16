@@ -26,7 +26,14 @@ public interface SectorCategoryMapRepository extends JpaRepository<SectorCategor
         WHERE scm.sector.sectorId = :sectorId
         AND scm.category.isActive = true
             """)
-    List<String> findCategoriesBysector(String sectorId);
+    List<String> findCategoriesBysector(Long sectorId);
+
+    @Query("""
+        SELECT e from  Category e where categoryId in (Select scm.category.categoryId FROM SectorCategoryMap scm
+        WHERE scm.sector.sectorId = :sectorId
+        AND scm.category.isActive = true)
+            """)
+    List<Category> findCategoriesListBysector(Long sectorId);
 
     @Query("""
     SELECT pt FROM CategoryProductTypeMap m
