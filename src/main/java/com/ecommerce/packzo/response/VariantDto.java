@@ -26,7 +26,6 @@ public class VariantDto{
     private String marketNameAndAddress;
     private String sellerAddress;
     private String material;
-
-
+    private Long qunatity;
 }
 

@@ -43,7 +43,7 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     private static ProductDto apply(Product p) {
-        return new ProductDto(p.getProductId(), p.getProductName(), p.getProductType().getTypeName(), p.getOriginalPrice(), p.getDiscountPrice(), p.getTotalRatings(), validationHelper.calculationOfDiscountedPrice(p.getOriginalPrice(), p.getDiscountPrice()));
+        return new ProductDto(p.getProductId(), p.getProductName(), p.getProductType().getTypeName(), p.getOriginalPrice(), p.getDiscountPrice(), p.getTotalRatings(), validationHelper.calculationOfDiscountedPrice(p.getOriginalPrice(), p.getDiscountPrice()), p.getQuantity());
     }
 
     // 1️⃣ Browse All
@@ -162,7 +162,7 @@ public class CatalogServiceImpl implements CatalogService {
             List<Product> productsList = Optional.ofNullable(productRepository.findProductsByCategoryAndSector(category.getCategoryId(), sectorId))
                     .filter(prod -> !prod.isEmpty()).orElseThrow(() -> new PaczoException(SERVICE_019, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
 
-            productDtoList = productsList.stream().map(product -> new ProductDto(product.getProductId(), product.getProductName(), product.getProductType().getTypeName(), product.getOriginalPrice(), product.getDiscountPrice(), product.getTotalRatings(), validationHelper.calculationOfDiscountedPrice(product.getOriginalPrice(), product.getDiscountPrice())))
+            productDtoList = productsList.stream().map(product -> new ProductDto(product.getProductId(), product.getProductName(), product.getProductType().getTypeName(), product.getOriginalPrice(), product.getDiscountPrice(), product.getTotalRatings(), validationHelper.calculationOfDiscountedPrice(product.getOriginalPrice(), product.getDiscountPrice()),product.getQuantity()))
                     .toList();
         } catch (PaczoException e) {
             throw new PaczoException(e.getErrorCode(), e.getText(), e.getErrorMessage());
@@ -300,7 +300,7 @@ public class CatalogServiceImpl implements CatalogService {
         try {
             List<Product> productsList = Optional.ofNullable(productRepository.findProductsByCategory(category.getCategoryId()))
                     .filter(prdList -> !prdList.isEmpty()).orElseThrow(() -> new PaczoException(SERVICE_021, PRD_CAT_NOT_FOUND, PRD_CAT_NOT_FOUND));
-            productsDtoList = productsList.stream().map(product -> new ProductDto(product.getProductId(), product.getProductName(), product.getProductType().getTypeName(), product.getOriginalPrice(), product.getDiscountPrice(), product.getTotalRatings(), validationHelper.calculationOfDiscountedPrice(product.getOriginalPrice(), product.getDiscountPrice()))).toList();
+            productsDtoList = productsList.stream().map(product -> new ProductDto(product.getProductId(), product.getProductName(), product.getProductType().getTypeName(), product.getOriginalPrice(), product.getDiscountPrice(), product.getTotalRatings(), validationHelper.calculationOfDiscountedPrice(product.getOriginalPrice(), product.getDiscountPrice()),product.getQuantity())).toList();
         } catch (PaczoException e) {
             throw new PaczoException(e.getErrorCode(), e.getText(), e.getErrorMessage());
         } catch (Exception ex) {

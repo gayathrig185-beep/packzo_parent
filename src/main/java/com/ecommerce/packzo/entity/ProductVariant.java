@@ -29,6 +29,7 @@ public class ProductVariant {
     private BigDecimal originalPrice;
     private BigDecimal discountedPrice;
     private String units;
+    private Long quantity;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;

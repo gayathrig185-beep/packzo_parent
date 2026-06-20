@@ -25,11 +25,13 @@ public class Product {
     private Integer totalRatings;
     private boolean isActive;
     private String customerCare;
+    private Long quantity;
     private String manfacturersAddress;
     private String sellerAddress;
     private String countryOfOrigin;
     private String returnPolicy;
     private String careDetails;
+    private String imageUrl;
     /*@ManyToMany
     @JoinTable(name = "product_category_mapping", schema="packzodev", joinColumns = @JoinColumn(name = "product_id"),
     inverseJoinColumns = @JoinColumn(name = "category_id"))

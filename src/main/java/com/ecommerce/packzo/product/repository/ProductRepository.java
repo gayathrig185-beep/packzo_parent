@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -34,7 +35,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             and p.isActive = true order by p.productId asc
             """)
     List<Product> findProductsByCategory(String categoryId);
-
 
 
     @Query("""
@@ -78,39 +78,107 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                        order by p.productId asc
             
             """)
-    Page<Product> findProductsByCategoryAndSectorbyProductId(String categoryId, long sectorId, String productTypeName,Pageable prdPage);
+    Page<Product> findProductsByCategoryAndSectorbyProductId(String categoryId, long sectorId, String productTypeName, Pageable prdPage);
 
 
     @Query("""
-           SELECT p FROM Product p where p.productType.typeId in (
-           SELECT pt.typeId FROM ProductType pt JOIN CategoryProductTypeMap cp 
-           ON pt.typeId = cp.productType.typeId where  cp.category.categoryId = :categoryId and LOWER(pt.typeName) LIKE LOWER(CONCAT('%', :productTypeName, '%'))
-           ) order by p.productId asc
+            SELECT p FROM Product p where p.productType.typeId in (
+            SELECT pt.typeId FROM ProductType pt JOIN CategoryProductTypeMap cp 
+            ON pt.typeId = cp.productType.typeId where  cp.category.categoryId = :categoryId and LOWER(pt.typeName) LIKE LOWER(CONCAT('%', :productTypeName, '%'))
+            ) order by p.productId asc
             
             """)
-    Page<Product> findProductsByCategorybyProductTypeName(String categoryId, String productTypeName,Pageable prdPage);
+    Page<Product> findProductsByCategorybyProductTypeName(String categoryId, String productTypeName, Pageable prdPage);
 
     @Query("""
-        SELECT DISTINCT p FROM Product p 
-            JOIN p.productType pt JOIN CategoryProductTypeMap cp
-            ON cp.productType = pt JOIN cp.category c WHERE p.isActive = true 
-            AND (LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.categoryName)
-            LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(pt.typeName)
-            LIKE LOWER(CONCAT('%', :keyword, '%')))
-    """)
-    List<Product> globalSearchProducts(String keyword,String categoryId);
+                SELECT DISTINCT p FROM Product p 
+                    JOIN p.productType pt JOIN CategoryProductTypeMap cp
+                    ON cp.productType = pt JOIN cp.category c WHERE p.isActive = true 
+                    AND (LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(c.categoryName)
+                    LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(pt.typeName)
+                    LIKE LOWER(CONCAT('%', :keyword, '%')))
+            """)
+    List<Product> globalSearchProducts(String keyword, String categoryId);
 
     @Query("""
-        SELECT DISTINCT p FROM Product p 
-            JOIN p.productType pt JOIN CategoryProductTypeMap cp
-            ON cp.productType = pt JOIN cp.category c WHERE p.isActive = true 
-            AND cp.category.categoryId = :categoryId
-            AND (LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.categoryName)
-            LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(pt.typeName)
-            LIKE LOWER(CONCAT('%', :keyword, '%')))
-    """)
-    List<Product> globalSearchProductsByCategory(String keyword,String categoryId);
+                SELECT DISTINCT p FROM Product p 
+                    JOIN p.productType pt JOIN CategoryProductTypeMap cp
+                    ON cp.productType = pt JOIN cp.category c WHERE p.isActive = true 
+                    AND cp.category.categoryId = :categoryId
+                    AND (LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(c.categoryName)
+                    LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(pt.typeName)
+                    LIKE LOWER(CONCAT('%', :keyword, '%')))
+            """)
+    List<Product> globalSearchProductsByCategory(String keyword, String categoryId);
+
+
+    @Query("""
+                SELECT DISTINCT p
+                FROM Product p
+                JOIN p.productType pt
+                JOIN CategoryProductTypeMap cp
+                    ON cp.productType = pt
+                JOIN cp.category c
+                WHERE p.isActive = true
+                AND (
+                    LOWER(p.productName)
+                        LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(pt.typeName)
+                        LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(c.categoryName)
+                        LIKE LOWER(CONCAT('%', :keyword, '%'))
+                )
+            """)
+    Page<Product> findSuggestions(
+            @Param("keyword") String keyword,
+            Pageable pageable);
+
+    @Query("""
+            SELECT DISTINCT p
+            FROM Product p
+            JOIN p.productType pt
+            JOIN CategoryProductTypeMap cp
+                 ON cp.productType = pt
+            WHERE cp.category.categoryId = :categoryId
+            AND p.isActive = true
+            AND (
+                  LOWER(p.productName)
+                  LIKE LOWER(CONCAT('%', :keyword, '%'))
+               OR LOWER(pt.typeName)
+                  LIKE LOWER(CONCAT('%', :keyword, '%'))
+            )
+            """)
+    List<Product> findSuggestionsByCategory(
+            @Param("keyword") String keyword,
+            @Param("categoryId") String categoryId,
+            Pageable pageable);
+
+
+
+    @Query("""
+            SELECT DISTINCT p
+            FROM Product p
+            JOIN p.productType pt
+            JOIN CategoryProductTypeMap cp
+                 ON cp.productType = pt
+            JOIN cp.category c
+            WHERE c.categoryId <> :selectedCategoryId
+            AND p.isActive = true
+            AND (
+                   LOWER(p.productName)
+                   LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(pt.typeName)
+                   LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(c.categoryName)
+                   LIKE LOWER(CONCAT('%', :keyword, '%'))
+            )
+            """)
+    List<Product> findProductsInOtherCategories(
+            @Param("keyword") String keyword,
+            @Param("selectedCategoryId") String selectedCategoryId,
+            Pageable pageable);
+
 
 }

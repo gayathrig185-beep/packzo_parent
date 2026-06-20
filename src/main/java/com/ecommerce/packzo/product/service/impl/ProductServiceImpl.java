@@ -72,6 +72,7 @@ public class ProductServiceImpl implements ProductService {
                         variantDto.setSellerAddress(product.getSellerAddress());
                         variantDto.setReturnPolicy(product.getReturnPolicy());
                         variantDto.setCareDetails(product.getCustomerCare());
+                        variantDto.setQunatity(product.getQuantity());
                         variantDtosList.add(variantDto);
                     }
                     List<VariantGroupDto> variantGroupDtoList =
