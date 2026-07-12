@@ -30,6 +30,8 @@ public class ProductVariant {
     private BigDecimal discountedPrice;
     private String units;
     private Long quantity;
+    @Column(name="image_url")
+    private String imageUrl;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;

@@ -58,7 +58,8 @@ public class SearchProductServiceImpl implements SearchProductService {
                             prd.getOriginalPrice(),
                             prd.getDiscountPrice(),
                             prd.getTotalRatings(),
-                            ""
+                            "",
+                            prd.getQuantity()
                     );
                 }).toList();
     }

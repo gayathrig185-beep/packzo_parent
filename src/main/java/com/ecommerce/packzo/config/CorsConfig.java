@@ -1,3 +1,4 @@
+/*
 package com.ecommerce.packzo.config;
 
 import org.springframework.context.annotation.Bean;
@@ -20,4 +21,4 @@ public class CorsConfig {
             }
         };
     }
-}
+}*/
