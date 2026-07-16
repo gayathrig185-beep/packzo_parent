@@ -12,7 +12,7 @@ import java.util.List;
        indexes = {
            @Index(name = "idx_user_email", columnList = "email"),
            @Index(name = "idx_user_mobile", columnList = "mobile")
-       })
+       }, schema = "packzodev")
 public class User extends BaseAuditEntity {
 
     @Id

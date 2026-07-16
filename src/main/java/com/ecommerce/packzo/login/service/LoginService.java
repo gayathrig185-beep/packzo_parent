@@ -61,7 +61,7 @@ public class LoginService {
         guest.setCreatedAt(LocalDateTime.now());
         guest.setExpiresAt(LocalDateTime.now().plusDays(30));
         guest.setActive(true);
-
+        guest.setStatus(GuestSessionStatus.ACTIVE);
         guestRepository.save(guest);
 
         return GuestSessionDto.builder()
